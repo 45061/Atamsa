@@ -1,42 +1,40 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/db';
-import bcrypt from 'bcrypt';
+import dbConnect from '@/lib/db';
+import User from '@/models/User';
 
 export async function POST(request: Request) {
   try {
+    await dbConnect(); // Conectar a la base de datos
+
     const data = await request.json();
 
-    if (!data.email || !data.password) {
-      return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
-    }
+    // Mongoose se encargará de la validación básica definida en el esquema
+    // (campos requeridos, email único, etc.)
+    
+    // El hasheo de la contraseña se hace automáticamente gracias al pre-save hook en el modelo
+    const newUser = await User.create(data);
 
-    const client = await clientPromise;
-    const dbName = process.env.MONGODB_DBNAME;
-
-    if (!dbName) {
-      throw new Error('Por favor, añade la variable MONGODB_DBNAME a tu archivo .env.local');
-    }
-
-    const db = client.db(dbName);
-    const collection = db.collection('atamsa');
-
-    // Hashear la contraseña antes de guardarla
-    const hashedPassword = await bcrypt.hash(data.password, 10); // 10 es el número de rondas de salting
-
-    const newUser = {
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      createdAt: new Date(),
-    };
-
-    const result = await collection.insertOne(newUser);
-
-    return NextResponse.json({ message: 'Usuario registrado con éxito', userId: result.insertedId }, { status: 201 });
+    return NextResponse.json({ message: 'Usuario registrado con éxito', user: newUser }, { status: 201 });
 
   } catch (e) {
     console.error(e);
-    const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error desconocido';
-    return NextResponse.json({ message: 'Error al registrar el usuario', error: errorMessage }, { status: 500 });
+    
+    let errorMessage = 'Ocurrió un error desconocido';
+    let statusCode = 500;
+
+    // Manejo de errores específicos de Mongoose
+    if (e instanceof Error) {
+        if (e.name === 'ValidationError') {
+            errorMessage = (e as any).message; // Proporciona mensajes de validación más detallados
+            statusCode = 400;
+        } else if ((e as any).code === 11000) { // Error de duplicado (ej. email)
+            errorMessage = 'El correo electrónico ya está registrado.';
+            statusCode = 409; // Conflict
+        } else {
+            errorMessage = e.message;
+        }
+    }
+    
+    return NextResponse.json({ message: 'Error al registrar el usuario', error: errorMessage }, { status: statusCode });
   }
 }

@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,14 +30,46 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     e.preventDefault();
 
     if (isLogin) {
-      // Lógica de inicio de sesión (puedes implementarla después)
-      console.log("Intentando iniciar sesión con:", formData);
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.email, password: formData.password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          toast.success(result.message || "¡Inicio de sesión exitoso!");
+          
+          // Guardar el token en localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', result.token);
+          }
+
+          // Resetear el formulario
+          setFormData({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            name: "",
+          });
+
+          onOpenChange(false);
+        } else {
+          toast.error(result.error || "Credenciales inválidas.");
+        }
+      } catch (error) {
+        toast.error("Ocurrió un error de red. Inténtalo de nuevo.");
+        console.error('Ocurrió un error durante el inicio de sesión:', error);
+      }
     } else {
       // Lógica de registro
       if (formData.password !== formData.confirmPassword) {
-        console.error("Las contraseñas no coinciden");
-        // Aquí podrías mostrar un mensaje de error al usuario
-        return;
+        toast.error("Las contraseñas no coinciden");
+        return; // Mantiene el modal abierto para corregir
       }
       try {
         const response = await fetch('/api/register', {
@@ -44,25 +77,31 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           headers: {
             'Content-Type': 'application/json',
           },
-          // Excluimos confirmPassword del objeto que se envía
           body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password }),
         });
 
         const result = await response.json();
 
-        if (response.ok) {
-          console.log('Registro exitoso:', result);
-          // Aquí podrías mostrar un mensaje de éxito
+        if (response.ok && response.status === 201) {
+          toast.success("¡Registro exitoso! Bienvenido.");
+          // Limpiar el formulario como se solicitó
+          setFormData({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            name: "",
+          });
+          // Cierra el modal
+          onOpenChange(false);
         } else {
-          console.error('Fallo en el registro:', result.message);
-          // Aquí podrías mostrar un mensaje de error
+          // Usa el mensaje de error de la API
+          toast.error(result.error || 'Fallo en el registro.');
         }
       } catch (error) {
+        toast.error("Ocurrió un error de red. Inténtalo de nuevo.");
         console.error('Ocurrió un error durante el registro:', error);
       }
     }
-    
-    onOpenChange(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
