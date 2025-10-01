@@ -18,6 +18,15 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ['user', 'superadmin'],
+    default: 'user',
+  },
+  OrdersUser: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order',
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
