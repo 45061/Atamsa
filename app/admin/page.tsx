@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import withAdminAuth from "@/components/withAdminAuth"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
+  Home,
   Upload,
   Package,
   Settings,
@@ -42,8 +44,6 @@ import {
   RefreshCw,
   X,
 } from "lucide-react"
-
-// ... (todas las interfaces y datos mock permanecen igual) ...
 
 interface Product {
   id: number
@@ -170,6 +170,30 @@ const mockAnalytics: AnalyticsData = {
       status: "Completado",
       date: "2024-01-15",
     },
+    {
+      id: "#ORD-002",
+      customer: "Carlos Rodríguez",
+      product: "Camiseta Precolombina",
+      amount: "$70,000",
+      status: "Enviado",
+      date: "2024-01-14",
+    },
+    {
+      id: "#ORD-003",
+      customer: "Ana López",
+      product: "Aretes Esmeralda",
+      amount: "$300,000",
+      status: "Procesando",
+      date: "2024-01-14",
+    },
+    {
+      id: "#ORD-004",
+      customer: "Luis Martínez",
+      product: "Mochila Wayuu",
+      amount: "$120,000",
+      status: "Completado",
+      date: "2024-01-13",
+    },
   ],
 }
 
@@ -185,6 +209,42 @@ const mockUsers: User[] = [
     joinDate: "2023-08-15",
     status: "Activo",
     lastActivity: "2024-01-15",
+  },
+  {
+    id: "USR-002",
+    name: "Carlos Rodríguez",
+    email: "carlos.rodriguez@email.com",
+    phone: "+57 301 987 6543",
+    location: "Medellín, Colombia",
+    totalOrders: 3,
+    totalSpent: "$890,000",
+    joinDate: "2023-09-22",
+    status: "Activo",
+    lastActivity: "2024-01-14",
+  },
+  {
+    id: "USR-003",
+    name: "Ana López",
+    email: "ana.lopez@email.com",
+    phone: "+57 302 456 7890",
+    location: "Cali, Colombia",
+    totalOrders: 8,
+    totalSpent: "$2,100,000",
+    joinDate: "2023-07-10",
+    status: "VIP",
+    lastActivity: "2024-01-16",
+  },
+  {
+    id: "USR-004",
+    name: "Luis Martínez",
+    email: "luis.martinez@email.com",
+    phone: "+57 303 654 3210",
+    location: "Cartagena, Colombia",
+    totalOrders: 2,
+    totalSpent: "$450,000",
+    joinDate: "2023-11-05",
+    status: "Activo",
+    lastActivity: "2024-01-13",
   },
 ]
 
@@ -203,6 +263,33 @@ const mockOrders: Order[] = [
     shippingAddress: "Calle 123 #45-67, Bogotá, Colombia",
     orderDate: "2024-01-15",
     estimatedDelivery: "2024-01-18",
+  },
+  {
+    id: "ORD-002",
+    customer: "Carlos Rodríguez",
+    email: "carlos.rodriguez@email.com",
+    products: [{ name: "Camiseta Precolombina", quantity: 2, price: "$70,000" }],
+    total: "$140,000",
+    status: "Enviado",
+    paymentMethod: "PayPal",
+    shippingAddress: "Carrera 80 #30-25, Medellín, Colombia",
+    orderDate: "2024-01-14",
+    estimatedDelivery: "2024-01-17",
+  },
+  {
+    id: "ORD-003",
+    customer: "Ana López",
+    email: "ana.lopez@email.com",
+    products: [
+      { name: "Mochila Wayuu", quantity: 1, price: "$120,000" },
+      { name: "Collar Muisca Dorado", quantity: 1, price: "$450,000" },
+    ],
+    total: "$570,000",
+    status: "Procesando",
+    paymentMethod: "Transferencia Bancaria",
+    shippingAddress: "Avenida 6 #15-30, Cali, Colombia",
+    orderDate: "2024-01-14",
+    estimatedDelivery: "2024-01-19",
   },
 ]
 
@@ -345,6 +432,15 @@ function AdminPage() {
           </div>
 
           <nav className="space-y-2">
+            <Link href="/">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-admin-muted hover:text-admin-foreground"
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  Inicio
+                </Button>
+            </Link>
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeSection === "productos" ? "text-admin-accent bg-admin-accent/10" : "text-admin-muted hover:text-admin-foreground"}`}
