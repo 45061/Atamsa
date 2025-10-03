@@ -23,6 +23,33 @@ const UserSchema = new mongoose.Schema({
     enum: ['user', 'superadmin'],
     default: 'user',
   },
+  phone: {
+    type: String,
+  },
+  location: {
+    type: String,
+  },
+  totalOrders: {
+    type: Number,
+    default: 0,
+  },
+  totalSpent: {
+    type: Number,
+    default: 0,
+  },
+  joinDate: {
+    type: Date,
+    default: Date.now,
+  },
+  status: {
+    type: String,
+    enum: ['Activo', 'Inactivo'],
+    default: 'Activo',
+  },
+  lastActivity: {
+    type: Date,
+    default: Date.now,
+  },
   OrdersUser: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
