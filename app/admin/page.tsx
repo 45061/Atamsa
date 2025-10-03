@@ -48,7 +48,6 @@ import {
 } from "lucide-react"
 
 interface Product {
-  id: number
   _id: string
   name: string
   price: string
@@ -420,9 +419,24 @@ function AdminPage() {
     }
   };
 
-  const handleDeleteProduct = (id: number) => {
-    setProducts(products.filter((p) => p.id !== id))
-  }
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setProducts(products.filter((p) => p._id !== id));
+        toast.success("Producto eliminado con éxito");
+      } else {
+        console.error("Error deleting product");
+        toast.error("Error al eliminar el producto");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Error al eliminar el producto");
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
