@@ -6,10 +6,19 @@ import { LoginModal } from "@/components/login-modal"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { decode } from "jsonwebtoken"
+
+interface DecodedToken {
+  id: string
+  role: string
+  iat: number
+  exp: number
+}
 
 export function Header() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const router = useRouter()
@@ -22,7 +31,14 @@ export function Header() {
     if (isClient) {
       const token = localStorage.getItem("token")
       if (token) {
-        setIsLoggedIn(true)
+        try {
+          const decodedToken = decode(token) as DecodedToken
+          setUserRole(decodedToken.role)
+          setIsLoggedIn(true)
+        } catch (error) {
+          console.error("Invalid token:", error)
+          handleLogout()
+        }
       }
     }
   }, [isClient])
@@ -30,6 +46,7 @@ export function Header() {
   const handleLogout = () => {
     localStorage.removeItem("token")
     setIsLoggedIn(false)
+    setUserRole(null)
     setIsDropdownOpen(false)
     router.push("/")
   }
@@ -39,9 +56,17 @@ export function Header() {
     if (!open) {
       const token = localStorage.getItem("token")
       if (token) {
-        setIsLoggedIn(true)
+        try {
+          const decodedToken = decode(token) as DecodedToken
+          setUserRole(decodedToken.role)
+          setIsLoggedIn(true)
+        } catch (error) {
+          console.error("Invalid token:", error)
+          handleLogout()
+        }
       } else {
         setIsLoggedIn(false)
+        setUserRole(null)
       }
     }
   }
@@ -72,8 +97,8 @@ export function Header() {
                 Nosotros
               </Link>
               <Link href="/bogota" className="text-sm font-medium hover:text-primary transition-colors">
-              Bogotá
-             </Link>
+                Bogotá
+              </Link>
             </nav>
 
             {/* Actions */}
@@ -84,7 +109,7 @@ export function Header() {
               <Button variant="ghost" size="icon" className="hidden sm:flex">
                 <Heart className="h-4 w-4" />
               </Button>
-              
+
               <div className="relative">
                 {isClient && isLoggedIn ? (
                   <div>
@@ -96,6 +121,11 @@ export function Header() {
                         <Link href="/cuenta" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>
                           Mi Cuenta
                         </Link>
+                        {userRole === 'superadmin' && (
+                          <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>
+                            Settings
+                          </Link>
+                        )}
                         <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Cerrar Sesión
                         </button>
@@ -112,11 +142,6 @@ export function Header() {
               <Link href="/carrito">
                 <Button variant="ghost" size="icon">
                   <ShoppingBag className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/admin">
-                <Button variant="ghost" size="icon" className="hidden sm:flex">
-                  <Settings className="h-4 w-4" />
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="md:hidden">

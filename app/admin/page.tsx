@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import withAdminAuth from "@/components/withAdminAuth"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
+  Home,
   Upload,
   Package,
   Settings,
@@ -290,7 +293,7 @@ const mockOrders: Order[] = [
   },
 ]
 
-export default function AdminPage() {
+function AdminPage() {
   const [activeSection, setActiveSection] = useState("productos")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false)
@@ -410,7 +413,6 @@ export default function AdminPage() {
   }
 
   const handleConfigUpdate = () => {
-    // Aquí iría la lógica para actualizar la configuración
     console.log("Configuración actualizada:", storeConfig)
   }
 
@@ -430,6 +432,15 @@ export default function AdminPage() {
           </div>
 
           <nav className="space-y-2">
+            <Link href="/">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-admin-muted hover:text-admin-foreground"
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  Inicio
+                </Button>
+            </Link>
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeSection === "productos" ? "text-admin-accent bg-admin-accent/10" : "text-admin-muted hover:text-admin-foreground"}`}
@@ -1881,3 +1892,5 @@ export default function AdminPage() {
     </div>
   )
 }
+
+export default withAdminAuth(AdminPage)
