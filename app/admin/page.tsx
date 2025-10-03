@@ -361,14 +361,23 @@ function AdminPage() {
   })
 
   const handleAddProduct = async () => {
-    if (newProduct.name && newProduct.price && newProduct.category) {
+    if (newProduct.name && newProduct.price && newProduct.category && newProduct.image) {
       try {
+        const formData = new FormData();
+        formData.append("name", newProduct.name);
+        formData.append("price", newProduct.price);
+        formData.append("originalPrice", newProduct.originalPrice);
+        formData.append("category", newProduct.category);
+        formData.append("image", newProduct.image);
+        formData.append("badge", newProduct.badge);
+        formData.append("badgeColor", newProduct.badgeColor);
+        formData.append("description", newProduct.description);
+        formData.append("rating", newProduct.rating.toString());
+        formData.append("reviews", newProduct.reviews.toString());
+
         const response = await fetch('/api/products', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newProduct),
+          body: formData,
         });
 
         if (response.ok) {

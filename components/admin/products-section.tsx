@@ -1,3 +1,4 @@
+import { FileUploader } from "@/components/ui/file-uploader";
 import {
   Card,
   CardContent,
@@ -196,16 +197,10 @@ export default function ProductsSection({
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="image" className="text-admin-foreground">
-                      URL de Imagen
+                      Imagen del Producto
                     </Label>
-                    <Input
-                      id="image"
-                      value={newProduct.image}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, image: e.target.value })
-                      }
-                      className="admin-input"
-                      placeholder="https://ejemplo.com/imagen.jpg"
+                    <FileUploader
+                      onFileChange={(file) => setNewProduct({ ...newProduct, image: file })}
                     />
                   </div>
 
