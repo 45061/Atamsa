@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import withAdminAuth from "@/components/withAdminAuth"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -49,6 +49,7 @@ import {
 
 interface Product {
   id: number
+  _id: string
   name: string
   price: string
   originalPrice?: string
@@ -301,21 +302,27 @@ function AdminPage() {
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false);
   const [fileUploaderKey, setFileUploaderKey] = useState(0);
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Collar Muisca Dorado",
-      price: "$450.000",
-      originalPrice: "$520.000",
-      category: "joyeria",
-      image: "/colombian-emerald-necklace-gold-muisca-design.jpg",
-      badge: "Bestseller",
-      badgeColor: "bg-admin-success text-white",
-      description: "Hermoso collar inspirado en la cultura Muisca con esmeraldas colombianas auténticas.",
-      rating: 4.9,
-      reviews: 23,
-    },
-  ])
+  const [products, setProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products");
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error("Error fetching products");
+          toast.error("Error al cargar los productos");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Error al cargar los productos");
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const [newProduct, setNewProduct] = useState({
     name: "",

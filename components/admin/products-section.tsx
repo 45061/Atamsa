@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 interface Product {
-  id: number;
+  _id: string;
   name: string;
   price: string;
   originalPrice?: string;
@@ -46,7 +46,7 @@ interface ProductsSectionProps {
   newProduct: any;
   setNewProduct: (newProduct: any) => void;
   handleAddProduct: () => void;
-  handleDeleteProduct: (id: number) => void;
+  handleDeleteProduct: (id: string) => void;
   fileUploaderKey: number;
 }
 
@@ -307,7 +307,7 @@ export default function ProductsSection({
               <div className="space-y-4">
                 {products.map((product) => (
                   <div
-                    key={product.id}
+                    key={product._id}
                     className="admin-card p-4 rounded-lg border border-admin-border"
                   >
                     <div className="flex items-center justify-between">
@@ -350,7 +350,7 @@ export default function ProductsSection({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product._id)}
                           className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
                         >
                           <Trash2 className="h-4 w-4" />
