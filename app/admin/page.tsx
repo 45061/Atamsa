@@ -299,6 +299,8 @@ function AdminPage() {
   const [activeSection, setActiveSection] = useState("productos")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileUploaderKey, setFileUploaderKey] = useState(0);
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -362,6 +364,7 @@ function AdminPage() {
 
   const handleAddProduct = async () => {
     if (newProduct.name && newProduct.price && newProduct.category && newProduct.image) {
+      setIsLoading(true);
       try {
         const formData = new FormData();
         formData.append("name", newProduct.name);
@@ -395,6 +398,7 @@ function AdminPage() {
             rating: 5,
             reviews: 0,
           });
+          setFileUploaderKey(prevKey => prevKey + 1);
           toast.success("Archivo guardado con éxito");
         } else {
           console.error("Error creating product");
@@ -403,6 +407,8 @@ function AdminPage() {
       } catch (error) {
         console.error("Error creating product:", error);
         toast.error("Error al guardar el producto");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -518,6 +524,7 @@ function AdminPage() {
               setNewProduct={setNewProduct}
               handleAddProduct={handleAddProduct}
               handleDeleteProduct={handleDeleteProduct}
+              fileUploaderKey={fileUploaderKey}
             />
           )}
 
@@ -1678,6 +1685,17 @@ function AdminPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isLoading}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Guardando producto...</DialogTitle>
+            <DialogDescription>
+              Por favor espera mientras se guarda el producto.
+            </DialogDescription>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
     </div>

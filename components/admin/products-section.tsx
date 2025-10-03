@@ -47,6 +47,7 @@ interface ProductsSectionProps {
   setNewProduct: (newProduct: any) => void;
   handleAddProduct: () => void;
   handleDeleteProduct: (id: number) => void;
+  fileUploaderKey: number;
 }
 
 export default function ProductsSection({
@@ -55,6 +56,7 @@ export default function ProductsSection({
   setNewProduct,
   handleAddProduct,
   handleDeleteProduct,
+  fileUploaderKey,
 }: ProductsSectionProps) {
   return (
     <>
@@ -200,6 +202,7 @@ export default function ProductsSection({
                       Imagen del Producto
                     </Label>
                     <FileUploader
+                      key={fileUploaderKey}
                       onFileChange={(file) => setNewProduct({ ...newProduct, image: file })}
                     />
                   </div>
