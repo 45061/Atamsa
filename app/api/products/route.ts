@@ -28,6 +28,8 @@ export async function POST(request: Request) {
     const description = formData.get("description") as string;
     const rating = formData.get("rating") as string;
     const reviews = formData.get("reviews") as string;
+    const materials = formData.get("materials") as string;
+    const styles = formData.get("styles") as string;
 
     if (!image) {
       return NextResponse.json({ message: "Image is required" }, { status: 400 });
@@ -65,6 +67,8 @@ export async function POST(request: Request) {
       description,
       rating: Number(rating),
       reviews: Number(reviews),
+      materials: materials ? JSON.parse(materials) : [],
+      styles: styles ? styles.split(",").map((s) => s.trim()) : [],
     });
 
     const savedProduct = await newProduct.save();

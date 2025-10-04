@@ -340,7 +340,7 @@ function AdminPage() {
     description: "",
     rating: 5,
     reviews: 0,
-    materials: "",
+    materials: [],
     styles: "",
   })
 
@@ -391,7 +391,7 @@ function AdminPage() {
         formData.append("description", newProduct.description);
         formData.append("rating", newProduct.rating.toString());
         formData.append("reviews", newProduct.reviews.toString());
-        formData.append("materials", newProduct.materials);
+        formData.append("materials", JSON.stringify(newProduct.materials));
         formData.append("styles", newProduct.styles);
 
         const response = await fetch('/api/products', {
@@ -413,7 +413,7 @@ function AdminPage() {
             description: "",
             rating: 5,
             reviews: 0,
-            materials: "",
+            materials: [],
             styles: "",
           });
           setFileUploaderKey(prevKey => prevKey + 1);
@@ -465,8 +465,12 @@ function AdminPage() {
       
       Object.keys(productToEdit).forEach(key => {
         if (key !== '_id' && key !== 'image') {
-          // @ts-ignore
-          formData.append(key, productToEdit[key]);
+          if (key === 'materials' && Array.isArray(productToEdit.materials)) {
+            formData.append('materials', JSON.stringify(productToEdit.materials));
+          } else {
+            // @ts-ignore
+            formData.append(key, productToEdit[key]);
+          }
         }
       });
 

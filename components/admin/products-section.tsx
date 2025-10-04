@@ -1,3 +1,6 @@
+'use client'
+
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
   Card,
@@ -203,14 +206,20 @@ export default function ProductsSection({
                     <Label htmlFor="materials" className="text-admin-foreground">
                       Materiales
                     </Label>
-                    <Input
-                      id="materials"
-                      value={newProduct.materials}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, materials: e.target.value })
-                      }
-                      className="admin-input"
-                      placeholder="Ej: Oro, Esmeralda, Plata (separados por comas)"
+                    <MultiSelectDropdown
+                        options={[
+                            { label: "Oro 18k", value: "oro-18k" },
+                            { label: "Plata 925", value: "plata-925" },
+                            { label: "Oro Blanco", value: "oro-blanco" },
+                            { label: "Platino", value: "platino" },
+                            { label: "Esmeralda", value: "esmeralda" },
+                        ]}
+                        selected={newProduct.materials}
+                        onChange={(selected) =>
+                            setNewProduct({ ...newProduct, materials: selected })
+                        }
+                        className="w-full"
+                        placeholder="Selecciona materiales"
                     />
                   </div>
 

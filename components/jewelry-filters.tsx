@@ -1,7 +1,11 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Filter, SlidersHorizontal, Search } from "lucide-react"
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown"
+import { useState } from "react"
 
 const priceRanges = [
   { label: "Menos de $200.000", value: "0-200000", count: 45 },
@@ -15,6 +19,7 @@ const materials = [
   { label: "Plata 925", count: 67 },
   { label: "Oro Blanco", count: 34 },
   { label: "Platino", count: 12 },
+  { label: "Esmeralda", count: 55 },
 ]
 
 const styles = [
@@ -25,6 +30,7 @@ const styles = [
 ]
 
 export function JewelryFilters() {
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   return (
     <section className="py-12 border-b">
       <div className="container mx-auto px-4">
@@ -86,15 +92,12 @@ export function JewelryFilters() {
               <Card>
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-3">Material</h3>
-                  <div className="space-y-2">
-                    {materials.slice(0, 3).map((material) => (
-                      <label key={material.label} className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <span>{material.label}</span>
-                        <span className="text-muted-foreground">({material.count})</span>
-                      </label>
-                    ))}
-                  </div>
+                  <MultiSelectDropdown
+                      options={materials.map(m => ({ label: m.label, value: m.label.toLowerCase().replace(/\s/g, '-') }))}
+                      selected={selectedMaterials}
+                      onChange={setSelectedMaterials}
+                      placeholder="Selecciona materiales"
+                  />
                 </CardContent>
               </Card>
 

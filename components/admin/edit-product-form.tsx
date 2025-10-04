@@ -1,3 +1,6 @@
+'use client'
+
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
   Card,
@@ -163,14 +166,19 @@ export default function EditProductForm({
               <Label htmlFor="materials" className="text-admin-foreground">
                 Materiales
               </Label>
-              <Input
-                id="materials"
-                value={productToEdit.materials?.join(', ')}
-                onChange={(e) =>
-                  setProductToEdit({ ...productToEdit, materials: e.target.value.split(',').map(s => s.trim()) })
-                }
-                className="admin-input"
-                placeholder="Ej: Oro, Esmeralda, Plata (separados por comas)"
+              <MultiSelectDropdown
+                  options={[
+                      { label: "Oro 18k", value: "oro-18k" },
+                      { label: "Plata 925", value: "plata-925" },
+                      { label: "Oro Blanco", value: "oro-blanco" },
+                      { label: "Platino", value: "platino" },
+                      { label: "Esmeralda", value: "esmeralda" },
+                  ]}
+                  selected={productToEdit.materials || []}
+                  onChange={(selected) =>
+                      setProductToEdit({ ...productToEdit, materials: selected })
+                  }
+                  placeholder="Selecciona materiales"
               />
             </div>
 

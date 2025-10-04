@@ -17,6 +17,13 @@ export async function PUT(
       updateData[key] = value;
     });
 
+    if (updateData.materials && typeof updateData.materials === 'string') {
+      updateData.materials = JSON.parse(updateData.materials);
+    }
+    if (updateData.styles && typeof updateData.styles === 'string') {
+      updateData.styles = updateData.styles.split(',').map((s: string) => s.trim());
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
       new: true,
     });
