@@ -204,7 +204,7 @@
   .admin-input {
     background-color: var(--admin-input);
     border: 1px solid var(--admin-border);
-    color: var(--admin-foreground);
+    color: #000000;
   }
 
   .admin-input:focus {
