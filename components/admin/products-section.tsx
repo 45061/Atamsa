@@ -47,6 +47,7 @@ interface ProductsSectionProps {
   setNewProduct: (newProduct: any) => void;
   handleAddProduct: () => void;
   handleDeleteProduct: (id: string) => void;
+  handleEditClick: (product: Product) => void;
   fileUploaderKey: number;
 }
 
@@ -56,6 +57,7 @@ export default function ProductsSection({
   setNewProduct,
   handleAddProduct,
   handleDeleteProduct,
+  handleEditClick,
   fileUploaderKey,
 }: ProductsSectionProps) {
   return (
@@ -343,6 +345,7 @@ export default function ProductsSection({
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleEditClick(product)}
                           className="border-admin-border text-admin-muted hover:text-admin-foreground bg-transparent"
                         >
                           <Edit className="h-4 w-4" />
