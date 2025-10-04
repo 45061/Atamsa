@@ -39,6 +39,8 @@ interface Product {
   description: string;
   rating: number;
   reviews: number;
+  materials?: string[];
+  styles?: string[];
 }
 
 interface ProductsSectionProps {
@@ -194,6 +196,36 @@ export default function ProductsSection({
                       }
                       className="admin-input"
                       placeholder="Ej: Bestseller, Nuevo, Exclusivo"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="materials" className="text-admin-foreground">
+                      Materiales
+                    </Label>
+                    <Input
+                      id="materials"
+                      value={newProduct.materials}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, materials: e.target.value })
+                      }
+                      className="admin-input"
+                      placeholder="Ej: Oro, Esmeralda, Plata (separados por comas)"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="styles" className="text-admin-foreground">
+                      Estilos
+                    </Label>
+                    <Input
+                      id="styles"
+                      value={newProduct.styles}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, styles: e.target.value })
+                      }
+                      className="admin-input"
+                      placeholder="Ej: Moderno, Clásico, Artesanal (separados por comas)"
                     />
                   </div>
                 </div>

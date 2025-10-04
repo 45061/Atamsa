@@ -60,6 +60,8 @@ interface Product {
   description: string
   rating: number
   reviews: number
+  materials?: string[];
+  styles?: string[];
 }
 
 interface AnalyticsData {
@@ -338,6 +340,8 @@ function AdminPage() {
     description: "",
     rating: 5,
     reviews: 0,
+    materials: "",
+    styles: "",
   })
 
   const [users] = useState<User[]>(mockUsers)
@@ -387,6 +391,8 @@ function AdminPage() {
         formData.append("description", newProduct.description);
         formData.append("rating", newProduct.rating.toString());
         formData.append("reviews", newProduct.reviews.toString());
+        formData.append("materials", newProduct.materials);
+        formData.append("styles", newProduct.styles);
 
         const response = await fetch('/api/products', {
           method: 'POST',
@@ -407,6 +413,8 @@ function AdminPage() {
             description: "",
             rating: 5,
             reviews: 0,
+            materials: "",
+            styles: "",
           });
           setFileUploaderKey(prevKey => prevKey + 1);
           toast.success("Archivo guardado con éxito");
@@ -457,7 +465,8 @@ function AdminPage() {
       
       Object.keys(productToEdit).forEach(key => {
         if (key !== '_id' && key !== 'image') {
-          formData.append(key, (productToEdit as any)[key]);
+          // @ts-ignore
+          formData.append(key, productToEdit[key]);
         }
       });
 

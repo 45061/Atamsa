@@ -11,6 +11,8 @@ export interface IProduct extends Document {
   description: string;
   rating?: number;
   reviews?: number;
+  materials?: string[];
+  styles?: string[];
 }
 
 const ProductSchema: Schema = new Schema({
@@ -24,6 +26,8 @@ const ProductSchema: Schema = new Schema({
   description: { type: String, required: true },
   rating: { type: Number },
   reviews: { type: Number },
+  materials: { type: [String] },
+  styles: { type: [String] },
 });
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
