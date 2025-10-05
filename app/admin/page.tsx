@@ -341,7 +341,7 @@ function AdminPage() {
     rating: 5,
     reviews: 0,
     materials: [],
-    styles: "",
+    styles: [],
   })
 
   const [users] = useState<User[]>(mockUsers)
@@ -392,7 +392,7 @@ function AdminPage() {
         formData.append("rating", newProduct.rating.toString());
         formData.append("reviews", newProduct.reviews.toString());
         formData.append("materials", JSON.stringify(newProduct.materials));
-        formData.append("styles", newProduct.styles);
+        formData.append("styles", JSON.stringify(newProduct.styles));
 
         const response = await fetch('/api/products', {
           method: 'POST',
@@ -414,7 +414,7 @@ function AdminPage() {
             rating: 5,
             reviews: 0,
             materials: [],
-            styles: "",
+            styles: [],
           });
           setFileUploaderKey(prevKey => prevKey + 1);
           toast.success("Archivo guardado con éxito");
@@ -465,8 +465,9 @@ function AdminPage() {
       
       Object.keys(productToEdit).forEach(key => {
         if (key !== '_id' && key !== 'image') {
-          if (key === 'materials' && Array.isArray(productToEdit.materials)) {
-            formData.append('materials', JSON.stringify(productToEdit.materials));
+          if ((key === 'materials' && Array.isArray(productToEdit.materials)) || (key === 'styles' && Array.isArray(productToEdit.styles))) {
+            // @ts-ignore
+            formData.append(key, JSON.stringify(productToEdit[key]));
           } else {
             // @ts-ignore
             formData.append(key, productToEdit[key]);

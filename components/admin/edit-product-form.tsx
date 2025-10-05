@@ -180,14 +180,18 @@ export default function EditProductForm({
               <Label htmlFor="styles" className="text-admin-foreground">
                 Estilos
               </Label>
-              <Input
-                id="styles"
-                value={productToEdit.styles?.join(', ')}
-                onChange={(e) =>
-                  setProductToEdit({ ...productToEdit, styles: e.target.value.split(',').map(s => s.trim()) })
-                }
-                className="admin-input"
-                placeholder="Ej: Moderno, Clásico, Artesanal (separados por comas)"
+              <MultiSelectDropdown
+                  options={[
+                      { label: "Clásico", value: "clasico" },
+                      { label: "Moderno", value: "moderno" },
+                      { label: "Precolombino", value: "precolombino" },
+                      { label: "Vintage", value: "vintage" },
+                  ]}
+                  selected={productToEdit.styles || []}
+                  onChange={(selected) =>
+                      setProductToEdit({ ...productToEdit, styles: selected })
+                  }
+                  placeholder="Selecciona estilos"
               />
             </div>
           </div>

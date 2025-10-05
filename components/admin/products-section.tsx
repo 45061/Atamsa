@@ -227,14 +227,19 @@ export default function ProductsSection({
                     <Label htmlFor="styles" className="text-admin-foreground">
                       Estilos
                     </Label>
-                    <Input
-                      id="styles"
-                      value={newProduct.styles}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, styles: e.target.value })
-                      }
-                      className="admin-input"
-                      placeholder="Ej: Moderno, Clásico, Artesanal (separados por comas)"
+                    <MultiSelectDropdown
+                        options={[
+                            { label: "Clásico", value: "clasico" },
+                            { label: "Moderno", value: "moderno" },
+                            { label: "Precolombino", value: "precolombino" },
+                            { label: "Vintage", value: "vintage" },
+                        ]}
+                        selected={newProduct.styles}
+                        onChange={(selected) =>
+                            setNewProduct({ ...newProduct, styles: selected })
+                        }
+                        className="w-full"
+                        placeholder="Selecciona estilos"
                     />
                   </div>
                 </div>

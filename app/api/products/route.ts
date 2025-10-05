@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       rating: Number(rating),
       reviews: Number(reviews),
       materials: materials ? JSON.parse(materials) : [],
-      styles: styles ? styles.split(",").map((s) => s.trim()) : [],
+      styles: styles ? JSON.parse(styles) : [],
     });
 
     const savedProduct = await newProduct.save();
