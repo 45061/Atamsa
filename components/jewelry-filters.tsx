@@ -89,15 +89,18 @@ export function JewelryFilters() {
               </Card>
 
               {/* Material */}
-              <Card>
+               <Card>
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-3">Material</h3>
-                  <MultiSelectDropdown
-                      options={materials.map(m => ({ label: m.label, value: m.label.toLowerCase().replace(/\s/g, '-') }))}
-                      selected={selectedMaterials}
-                      onChange={setSelectedMaterials}
-                      placeholder="Selecciona materiales"
-                  />
+                  <div className="space-y-2">
+                    {materials.slice(0, 3).map((material) => (
+                      <label key={material.label} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" className="rounded" />
+                        <span>{material.label}</span>
+                        <span className="text-muted-foreground">({material.count})</span>
+                      </label>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
 

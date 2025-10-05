@@ -1557,6 +1557,12 @@ function AdminPage() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="admin-card max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Producto</DialogTitle>
+            <DialogDescription>
+              Aquí puedes editar los detalles del producto.
+            </DialogDescription>
+          </DialogHeader>
           <EditProductForm
             productToEdit={productToEdit}
             setProductToEdit={setProductToEdit}
