@@ -13,6 +13,7 @@ export interface IProduct extends Document {
   reviews?: number;
   materials?: string[];
   styles?: string[];
+  inStock?: boolean;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -28,6 +29,7 @@ const ProductSchema: Schema = new Schema({
   reviews: { type: Number },
   materials: { type: [String] },
   styles: { type: [String] },
+  inStock: { type: Boolean, default: true },
 });
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
