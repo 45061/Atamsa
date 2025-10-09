@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from "react";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "../ui/switch";
 import { Save, Edit } from "lucide-react";
 
 interface Product {
@@ -35,11 +37,12 @@ interface Product {
   reviews: number;
   materials?: string[];
   styles?: string[];
+  inStock?: boolean;
 }
 
 interface EditProductFormProps {
   productToEdit: Product | null;
-  setProductToEdit: (product: Product | null) => void;
+  setProductToEdit: React.Dispatch<React.SetStateAction<Product | null>>;
   handleUpdateProduct: () => void;
   setNewImageFile: (file: File | null) => void;
   fileUploaderKey: number;
@@ -169,8 +172,16 @@ export default function EditProductForm({
                       { label: "Esmeralda", value: "esmeralda" },
                   ]}
                   selected={productToEdit.materials || []}
-                  onChange={(selected) =>
-                      setProductToEdit({ ...productToEdit, materials: selected })
+                  onChange={(selectedUpdate) =>
+                    setProductToEdit((currentProduct) => {
+                      if (!currentProduct) return null;
+                      const oldMaterials = currentProduct.materials || [];
+                      const newMaterials =
+                        typeof selectedUpdate === "function"
+                          ? selectedUpdate(oldMaterials)
+                          : selectedUpdate;
+                      return { ...currentProduct, materials: newMaterials };
+                    })
                   }
                   placeholder="Selecciona materiales"
               />
@@ -188,11 +199,31 @@ export default function EditProductForm({
                       { label: "Vintage", value: "vintage" },
                   ]}
                   selected={productToEdit.styles || []}
-                  onChange={(selected) =>
-                      setProductToEdit({ ...productToEdit, styles: selected })
+                  onChange={(selectedUpdate) =>
+                    setProductToEdit((currentProduct) => {
+                      if (!currentProduct) return null;
+                      const oldStyles = currentProduct.styles || [];
+                      const newStyles =
+                        typeof selectedUpdate === "function"
+                          ? selectedUpdate(oldStyles)
+                          : selectedUpdate;
+                      return { ...currentProduct, styles: newStyles };
+                    })
                   }
                   placeholder="Selecciona estilos"
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="inStock"
+                checked={productToEdit.inStock}
+                onCheckedChange={(checked) =>
+                  setProductToEdit({ ...productToEdit, inStock: checked })
+                }
+              />
+              <Label htmlFor="inStock" className="text-admin-foreground">
+                En Stock
+              </Label>
             </div>
           </div>
 
