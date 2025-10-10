@@ -40,6 +40,7 @@ interface Product {
   materials?: string[];
   styles?: string[];
   inStock?: boolean;
+  subcategory?: string;
 }
 
 interface EditProductFormProps {
@@ -151,6 +152,35 @@ export default function EditProductForm({
                     Arte Precolombino
                   </SelectItem>
                   <SelectItem value="bogota">Bogotá</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="subcategory"
+                className="text-admin-foreground"
+              >
+                Subcategoría
+              </Label>
+              <Select
+                value={productToEdit.subcategory}
+                onValueChange={(value) =>
+                  setProductToEdit({ ...productToEdit, subcategory: value })
+                }
+              >
+                <SelectTrigger className="admin-input">
+                  <SelectValue placeholder="Selecciona una subcategoría" />
+                </SelectTrigger>
+                <SelectContent className="admin-card">
+                  <SelectItem value="collares">Collares</SelectItem>
+                  <SelectItem value="aretes">Aretes</SelectItem>
+                  <SelectItem value="anillos">Anillos</SelectItem>
+                  <SelectItem value="pulseras">Pulseras</SelectItem>
+                  <SelectItem value="conjuntos">Conjuntos</SelectItem>
+                  <SelectItem value="broches">Broches</SelectItem>
+                  <SelectItem value="camisas">Camisas</SelectItem>
+                  <SelectItem value="hoodies">Hoodies</SelectItem>
                 </SelectContent>
               </Select>
             </div>

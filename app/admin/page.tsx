@@ -62,6 +62,7 @@ interface Product {
   reviews: number
   materials?: string[];
   styles?: string[];
+  subcategory: string;
 }
 
 interface AnalyticsData {
@@ -343,6 +344,7 @@ function AdminPage() {
     reviews: 0,
     materials: [],
     styles: [],
+    subcategory: "",
   })
 
   const [users] = useState<User[]>(mockUsers)
@@ -386,6 +388,7 @@ function AdminPage() {
         formData.append("price", newProduct.price);
         formData.append("originalPrice", newProduct.originalPrice);
         formData.append("category", newProduct.category);
+        formData.append("subcategory", newProduct.subcategory);
         formData.append("image", newProduct.image);
         formData.append("badge", newProduct.badge);
         formData.append("badgeColor", newProduct.badgeColor);
@@ -416,6 +419,7 @@ function AdminPage() {
             reviews: 0,
             materials: [],
             styles: [],
+            subcategory: "",
           });
           setFileUploaderKey(prevKey => prevKey + 1);
           toast.success("Archivo guardado con éxito");

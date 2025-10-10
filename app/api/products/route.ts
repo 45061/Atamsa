@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     const reviews = formData.get("reviews") as string;
     const materials = formData.get("materials") as string;
     const styles = formData.get("styles") as string;
+    const subcategory = formData.get("subcategory") as string;
 
     if (!image) {
       return NextResponse.json({ message: "Image is required" }, { status: 400 });
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
       price,
       originalPrice,
       category,
+      subcategory,
       image: imageUrl,
       badge,
       badgeColor,

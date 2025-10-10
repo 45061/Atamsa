@@ -15,6 +15,7 @@ export interface IProduct extends Document {
   materials?: string[];
   styles?: string[];
   inStock?: boolean;
+  subcategory?: string;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -22,7 +23,8 @@ const ProductSchema: Schema = new Schema({
   price: { type: String, required: true },
   originalPrice: { type: String },
   category: { type: String, required: true },
-    image: { type: String, required: true },
+  subcategory: { type: String },
+  image: { type: String, required: true },
   images: { type: [String] },
   badge: { type: String },
   badgeColor: { type: String },

@@ -36,6 +36,7 @@ interface Product {
   price: string;
   originalPrice?: string;
   category: string;
+  subcategory?: string;
   image: string;
   badge: string;
   badgeColor: string;
@@ -183,6 +184,35 @@ export default function ProductsSection({
                           Arte Precolombino
                         </SelectItem>
                         <SelectItem value="bogota">Bogotá</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor="subcategory"
+                      className="text-admin-foreground"
+                    >
+                      Subcategoría
+                    </Label>
+                    <Select
+                      value={newProduct.subcategory}
+                      onValueChange={(value) =>
+                        setNewProduct({ ...newProduct, subcategory: value })
+                      }
+                    >
+                      <SelectTrigger className="admin-input">
+                        <SelectValue placeholder="Selecciona una subcategoría" />
+                      </SelectTrigger>
+                      <SelectContent className="admin-card">
+                        <SelectItem value="collares">Collares</SelectItem>
+                        <SelectItem value="aretes">Aretes</SelectItem>
+                        <SelectItem value="anillos">Anillos</SelectItem>
+                        <SelectItem value="pulseras">Pulseras</SelectItem>
+                        <SelectItem value="conjuntos">Conjuntos</SelectItem>
+                        <SelectItem value="broches">Broches</SelectItem>
+                        <SelectItem value="camisas">Camisas</SelectItem>
+                        <SelectItem value="hoodies">Hoodies</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -371,6 +401,9 @@ export default function ProductsSection({
                           </h3>
                           <p className="text-admin-muted text-sm">
                             {product.category}
+                          </p>
+                          <p className="text-admin-muted text-sm">
+                            {product.subcategory}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="font-bold text-admin-accent">
