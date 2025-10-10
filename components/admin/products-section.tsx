@@ -1,3 +1,6 @@
+'use client'
+
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
   Card,
@@ -33,12 +36,15 @@ interface Product {
   price: string;
   originalPrice?: string;
   category: string;
+  subcategory?: string;
   image: string;
   badge: string;
   badgeColor: string;
   description: string;
   rating: number;
   reviews: number;
+  materials?: string[];
+  styles?: string[];
 }
 
 interface ProductsSectionProps {
@@ -183,6 +189,35 @@ export default function ProductsSection({
                   </div>
 
                   <div>
+                    <Label
+                      htmlFor="subcategory"
+                      className="text-admin-foreground"
+                    >
+                      Subcategoría
+                    </Label>
+                    <Select
+                      value={newProduct.subcategory}
+                      onValueChange={(value) =>
+                        setNewProduct({ ...newProduct, subcategory: value })
+                      }
+                    >
+                      <SelectTrigger className="admin-input">
+                        <SelectValue placeholder="Selecciona una subcategoría" />
+                      </SelectTrigger>
+                      <SelectContent className="admin-card">
+                        <SelectItem value="collares">Collares</SelectItem>
+                        <SelectItem value="aretes">Aretes</SelectItem>
+                        <SelectItem value="anillos">Anillos</SelectItem>
+                        <SelectItem value="pulseras">Pulseras</SelectItem>
+                        <SelectItem value="conjuntos">Conjuntos</SelectItem>
+                        <SelectItem value="broches">Broches</SelectItem>
+                        <SelectItem value="camisas">Camisas</SelectItem>
+                        <SelectItem value="hoodies">Hoodies</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="badge" className="text-admin-foreground">
                       Etiqueta
                     </Label>
@@ -194,6 +229,47 @@ export default function ProductsSection({
                       }
                       className="admin-input"
                       placeholder="Ej: Bestseller, Nuevo, Exclusivo"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="materials" className="text-admin-foreground">
+                      Materiales
+                    </Label>
+                    <MultiSelectDropdown
+                        options={[
+                            { label: "Oro 18k", value: "oro-18k" },
+                            { label: "Plata 925", value: "plata-925" },
+                            { label: "Oro Blanco", value: "oro-blanco" },
+                            { label: "Platino", value: "platino" },
+                            { label: "Esmeralda", value: "esmeralda" },
+                        ]}
+                        selected={newProduct.materials}
+                        onChange={(selected) =>
+                            setNewProduct({ ...newProduct, materials: selected })
+                        }
+                        className="w-full"
+                        placeholder="Selecciona materiales"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="styles" className="text-admin-foreground">
+                      Estilos
+                    </Label>
+                    <MultiSelectDropdown
+                        options={[
+                            { label: "Clásico", value: "clasico" },
+                            { label: "Moderno", value: "moderno" },
+                            { label: "Precolombino", value: "precolombino" },
+                            { label: "Vintage", value: "vintage" },
+                        ]}
+                        selected={newProduct.styles}
+                        onChange={(selected) =>
+                            setNewProduct({ ...newProduct, styles: selected })
+                        }
+                        className="w-full"
+                        placeholder="Selecciona estilos"
                     />
                   </div>
                 </div>
@@ -325,6 +401,9 @@ export default function ProductsSection({
                           </h3>
                           <p className="text-admin-muted text-sm">
                             {product.category}
+                          </p>
+                          <p className="text-admin-muted text-sm">
+                            {product.subcategory}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="font-bold text-admin-accent">

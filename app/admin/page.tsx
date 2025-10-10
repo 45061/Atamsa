@@ -60,6 +60,9 @@ interface Product {
   description: string
   rating: number
   reviews: number
+  materials?: string[];
+  styles?: string[];
+  subcategory: string;
 }
 
 interface AnalyticsData {
@@ -306,6 +309,7 @@ function AdminPage() {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [newCarouselImageFiles, setNewCarouselImageFiles] = useState<File[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -338,6 +342,9 @@ function AdminPage() {
     description: "",
     rating: 5,
     reviews: 0,
+    materials: [],
+    styles: [],
+    subcategory: "",
   })
 
   const [users] = useState<User[]>(mockUsers)
@@ -381,12 +388,15 @@ function AdminPage() {
         formData.append("price", newProduct.price);
         formData.append("originalPrice", newProduct.originalPrice);
         formData.append("category", newProduct.category);
+        formData.append("subcategory", newProduct.subcategory);
         formData.append("image", newProduct.image);
         formData.append("badge", newProduct.badge);
         formData.append("badgeColor", newProduct.badgeColor);
         formData.append("description", newProduct.description);
         formData.append("rating", newProduct.rating.toString());
         formData.append("reviews", newProduct.reviews.toString());
+        formData.append("materials", JSON.stringify(newProduct.materials));
+        formData.append("styles", JSON.stringify(newProduct.styles));
 
         const response = await fetch('/api/products', {
           method: 'POST',
@@ -407,6 +417,9 @@ function AdminPage() {
             description: "",
             rating: 5,
             reviews: 0,
+            materials: [],
+            styles: [],
+            subcategory: "",
           });
           setFileUploaderKey(prevKey => prevKey + 1);
           toast.success("Archivo guardado con éxito");
@@ -445,6 +458,7 @@ function AdminPage() {
   const handleEditClick = (product: Product) => {
     setProductToEdit({ ...product });
     setNewImageFile(null);
+    setNewCarouselImageFiles([]);
     setIsEditDialogOpen(true);
   };
 
@@ -456,13 +470,29 @@ function AdminPage() {
       const formData = new FormData();
       
       Object.keys(productToEdit).forEach(key => {
-        if (key !== '_id' && key !== 'image') {
-          formData.append(key, (productToEdit as any)[key]);
+        if (key !== '_id' && key !== 'image' && key !== 'images') {
+          if ((key === 'materials' && Array.isArray(productToEdit.materials)) || (key === 'styles' && Array.isArray(productToEdit.styles))) {
+            // @ts-ignore
+            formData.append(key, JSON.stringify(productToEdit[key]));
+          } else {
+            // @ts-ignore
+            formData.append(key, productToEdit[key]);
+          }
         }
       });
 
+      if (productToEdit.images) {
+        formData.append("existingImages", JSON.stringify(productToEdit.images));
+      }
+
       if (newImageFile) {
         formData.append("image", newImageFile);
+      }
+
+      if (newCarouselImageFiles.length > 0) {
+        newCarouselImageFiles.forEach(file => {
+          formData.append('images', file);
+        });
       }
 
       const response = await fetch(`/api/products/${productToEdit._id}`, {
@@ -1544,11 +1574,18 @@ function AdminPage() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="admin-card max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Producto</DialogTitle>
+            <DialogDescription>
+              Aquí puedes editar los detalles del producto.
+            </DialogDescription>
+          </DialogHeader>
           <EditProductForm
             productToEdit={productToEdit}
             setProductToEdit={setProductToEdit}
             handleUpdateProduct={handleUpdateProduct}
             setNewImageFile={setNewImageFile}
+            setNewCarouselImageFiles={setNewCarouselImageFiles}
             fileUploaderKey={fileUploaderKey}
           />
         </DialogContent>
