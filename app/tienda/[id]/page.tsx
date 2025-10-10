@@ -1,11 +1,20 @@
-'use client';
+'use client'
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Star, ShoppingCart, Heart } from "lucide-react";
-import { Separator } from '@/components/ui/separator';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Star, ShoppingCart } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel"
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 
@@ -16,103 +25,162 @@ interface Product {
   originalPrice?: string;
   category: string;
   image: string;
+  images?: string[];
   badge?: string;
   description: string;
   rating?: number;
   reviews?: number;
+  inStock?: boolean;
   materials?: string[];
   styles?: string[];
-  inStock?: boolean;
 }
 
-export default function ProductDetailPage() {
+async function getProduct(id: string): Promise<Product | null> {
+  try {
+    const res = await fetch(`/api/products/${id}`);
+    if (!res.ok) {
+      return null;
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Failed to fetch product:", error);
+    return null;
+  }
+}
+
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const [product, setProduct] = useState<Product | null>(null);
-  const { id } = useParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [mainApi, setMainApi] = useState<CarouselApi>()
+  const [thumbApi, setThumbApi] = useState<CarouselApi>()
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    if (id) {
-      fetch(`/api/products/${id}`)
-        .then((res) => res.json())
-        .then((data) => setProduct(data));
+    const fetchProduct = async () => {
+      setIsLoading(true);
+      const fetchedProduct = await getProduct(params.id);
+      setProduct(fetchedProduct);
+      setIsLoading(false);
+    };
+    fetchProduct();
+  }, [params.id]);
+
+  useEffect(() => {
+    if (!mainApi || !thumbApi) {
+      return
     }
-  }, [id]);
+
+    const onSelect = () => {
+      setSelectedIndex(mainApi.selectedScrollSnap())
+      thumbApi.scrollTo(mainApi.selectedScrollSnap())
+    }
+
+    mainApi.on("select", onSelect)
+    mainApi.on("reInit", onSelect)
+
+  }, [mainApi, thumbApi])
+
+  const onThumbClick = (index: number) => {
+    mainApi?.scrollTo(index)
+  }
+
+  if (isLoading) {
+    return <div>Cargando...</div>; // Replace with a nice skeleton loader later
+  }
 
   if (!product) {
-    return <div>Loading...</div>;
+    notFound();
   }
+
+  const allImages = [product.image, ...(product.images || [])];
 
   return (
     <>
       <Header />
-      <div className="container mx-auto py-12 px-4 md:px-6">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          <div className="flex items-center justify-center">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="rounded-lg object-cover w-full aspect-square"
-            />
-          </div>
-          <div className="flex flex-col justify-center">
-            <div className="space-y-4">
-              {product.badge && <Badge>{product.badge}</Badge>}
-              <h1 className="font-bold text-3xl lg:text-4xl">{product.name}</h1>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${i < Math.floor(product.rating || 0) ? "fill-primary text-primary" : "text-muted-foreground"}`}
-                    />
-                  ))}
+      <main>
+        <div className="container mx-auto px-4 py-8">
+          <Card className="overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-6">
+                <Carousel setApi={setMainApi} className="w-full max-w-xl mx-auto">
+                  <CarouselContent>
+                    {allImages.map((img, index) => (
+                      <CarouselItem key={index}>
+                        <div className="aspect-square w-full overflow-hidden rounded-lg">
+                          <Image
+                            src={img}
+                            alt={`${product.name} - image ${index + 1}`}
+                            width={600}
+                            height={600}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="-left-4" />
+                  <CarouselNext className="-right-4" />
+                </Carousel>
+                <Carousel setApi={setThumbApi} opts={{ containScroll: "keepSnaps", dragFree: true }} className="w-full max-w-xl mx-auto mt-4">
+                  <CarouselContent className="-ml-2">
+                    {allImages.map((img, index) => (
+                      <CarouselItem key={index} onClick={() => onThumbClick(index)} className="pl-2 basis-1/4 cursor-pointer">
+                        <div className={`aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === selectedIndex ? 'opacity-100' : 'opacity-50'}`}>
+                          <Image
+                            src={img}
+                            alt={`${product.name} - thumbnail ${index + 1}`}
+                            width={150}
+                            height={150}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
+              </div>
+
+              <div className="p-6 bg-muted/20 flex flex-col justify-center">
+                <div className="max-w-md">
+                  <p className="text-sm text-muted-foreground">{product.category}</p>
+                  <h1 className="text-3xl md:text-4xl font-bold mt-2">{product.name}</h1>
+                  
+                  <div className="flex items-center mt-4">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-5 h-5 ${i < (product.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                      ))}
+                    </div>
+                    <p className="ml-2 text-sm text-muted-foreground">({product.reviews} reseñas)</p>
+                  </div>
+
+                  <p className="text-3xl font-bold mt-6">{product.price}</p>
+                  {product.originalPrice && (
+                    <p className="text-muted-foreground line-through ml-2">{product.originalPrice}</p>
+                  )}
+
+                  <div className="mt-6 prose prose-sm text-muted-foreground max-w-none" dangerouslySetInnerHTML={{ __html: product.description }} />
+
+                  <div className="mt-6 flex items-center gap-2">
+                    {product.inStock ? (
+                      <Badge variant="default" className="bg-green-500">En Stock</Badge>
+                    ) : (
+                      <Badge variant="destructive">Agotado</Badge>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <Button size="lg" className="w-full">
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      Añadir al Carrito
+                    </Button>
+                  </div>
                 </div>
-                <span className="text-muted-foreground text-sm">({product.reviews} reviews)</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold">{product.price}</span>
-                {product.originalPrice && (
-                  <span className="text-xl text-muted-foreground line-through">{product.originalPrice}</span>
-                )}
-              </div>
-              <Separator />
-              <p className="text-muted-foreground">{product.description}</p>
-              <div className="flex flex-col gap-2">
-                  {product.materials && (
-                      <div className="flex items-center gap-2">
-                          <span className="font-semibold">Materials:</span>
-                          <div className="flex gap-2">
-                          {product.materials.map((material) => (
-                              <Badge key={material} variant="secondary">{material}</Badge>
-                          ))}
-                          </div>
-                      </div>
-                  )}
-                  {product.styles && (
-                      <div className="flex items-center gap-2">
-                          <span className="font-semibold">Styles:</span>
-                          <div className="flex gap-2">
-                          {product.styles.map((style) => (
-                              <Badge key={style} variant="secondary">{style}</Badge>
-                          ))}
-                          </div>
-                      </div>
-                  )}
-              </div>
-              <Separator />
-              <div className="flex items-center gap-4">
-                <Button size="lg" disabled={!product.inStock}>
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  {product.inStock ? "Add to Cart" : "Out of Stock"}
-                </Button>
-                <Button size="lg" variant="outline">
-                  <Heart className="mr-2 h-5 w-5" />
-                  Add to Wishlist
-                </Button>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
-      </div>
+      </main>
       <Footer />
     </>
   );

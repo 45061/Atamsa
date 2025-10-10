@@ -3,6 +3,7 @@
 import * as React from "react";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { FileUploader } from "@/components/ui/file-uploader";
+import { MultiFileUploader } from "@/components/ui/multi-file-uploader";
 import {
   Card,
   CardContent,
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "../ui/switch";
-import { Save, Edit } from "lucide-react";
+import { Save, Edit, X } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -30,6 +31,7 @@ interface Product {
   originalPrice?: string;
   category: string;
   image: string;
+  images?: string[];
   badge: string;
   badgeColor: string;
   description: string;
@@ -45,6 +47,7 @@ interface EditProductFormProps {
   setProductToEdit: React.Dispatch<React.SetStateAction<Product | null>>;
   handleUpdateProduct: () => void;
   setNewImageFile: (file: File | null) => void;
+  setNewCarouselImageFiles: (files: File[]) => void;
   fileUploaderKey: number;
 }
 
@@ -53,9 +56,17 @@ export default function EditProductForm({
   setProductToEdit,
   handleUpdateProduct,
   setNewImageFile,
+  setNewCarouselImageFiles,
   fileUploaderKey,
 }: EditProductFormProps) {
   if (!productToEdit) return null;
+
+  const handleRemoveExistingImage = (imageUrl: string) => {
+    if (productToEdit && productToEdit.images) {
+      const updatedImages = productToEdit.images.filter(img => img !== imageUrl);
+      setProductToEdit({ ...productToEdit, images: updatedImages });
+    }
+  };
 
   return (
     <Card className="admin-card">
@@ -230,13 +241,39 @@ export default function EditProductForm({
           <div className="space-y-4">
             <div>
               <Label htmlFor="image" className="text-admin-foreground">
-                Imagen del Producto (deja vacío para no cambiar)
+                Imagen Principal (deja vacío para no cambiar)
               </Label>
               <FileUploader
                 key={fileUploaderKey}
                 onFileChange={(file) => setNewImageFile(file)}
               />
             </div>
+
+            <div>
+              <Label htmlFor="carousel-images" className="text-admin-foreground">
+                Imágenes del Carrusel (múltiples)
+              </Label>
+              <MultiFileUploader onFilesChange={setNewCarouselImageFiles} />
+            </div>
+
+            {productToEdit.images && productToEdit.images.length > 0 && (
+              <div>
+                <Label className="text-admin-foreground">Imágenes Actuales del Carrusel</Label>
+                <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                  {productToEdit.images.map((imageUrl, index) => (
+                    <div key={index} className="relative">
+                      <img src={imageUrl} alt={`Carousel image ${index + 1}`} className="w-full h-auto rounded-lg" />
+                      <button
+                        onClick={() => handleRemoveExistingImage(imageUrl)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <Label

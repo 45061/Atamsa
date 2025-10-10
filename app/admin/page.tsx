@@ -308,6 +308,7 @@ function AdminPage() {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [newCarouselImageFiles, setNewCarouselImageFiles] = useState<File[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -453,6 +454,7 @@ function AdminPage() {
   const handleEditClick = (product: Product) => {
     setProductToEdit({ ...product });
     setNewImageFile(null);
+    setNewCarouselImageFiles([]);
     setIsEditDialogOpen(true);
   };
 
@@ -464,7 +466,7 @@ function AdminPage() {
       const formData = new FormData();
       
       Object.keys(productToEdit).forEach(key => {
-        if (key !== '_id' && key !== 'image') {
+        if (key !== '_id' && key !== 'image' && key !== 'images') {
           if ((key === 'materials' && Array.isArray(productToEdit.materials)) || (key === 'styles' && Array.isArray(productToEdit.styles))) {
             // @ts-ignore
             formData.append(key, JSON.stringify(productToEdit[key]));
@@ -475,8 +477,18 @@ function AdminPage() {
         }
       });
 
+      if (productToEdit.images) {
+        formData.append("existingImages", JSON.stringify(productToEdit.images));
+      }
+
       if (newImageFile) {
         formData.append("image", newImageFile);
+      }
+
+      if (newCarouselImageFiles.length > 0) {
+        newCarouselImageFiles.forEach(file => {
+          formData.append('images', file);
+        });
       }
 
       const response = await fetch(`/api/products/${productToEdit._id}`, {
@@ -1569,6 +1581,7 @@ function AdminPage() {
             setProductToEdit={setProductToEdit}
             handleUpdateProduct={handleUpdateProduct}
             setNewImageFile={setNewImageFile}
+            setNewCarouselImageFiles={setNewCarouselImageFiles}
             fileUploaderKey={fileUploaderKey}
           />
         </DialogContent>
