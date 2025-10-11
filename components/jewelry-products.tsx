@@ -23,21 +23,11 @@ interface Product {
   category: string;
 }
 
-export function JewelryProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
+interface JewelryProductsProps {
+  products: Product[];
+}
 
-  useEffect(() => {
-    fetch('/api/products')
-      .then(res => res.json())
-      .then(allProducts => {
-        const jewelryProducts = allProducts.filter((product: Product) => {
-          const category = product.category || '';
-          // Case- and accent-insensitive regex for 'joyeria'
-          return /joyer[ií]a/i.test(category);
-        });
-        setProducts(jewelryProducts);
-      });
-  }, []);
+export function JewelryProducts({ products }: JewelryProductsProps) {
 
   return (
     <section className="py-20">

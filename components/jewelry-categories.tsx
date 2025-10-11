@@ -53,7 +53,11 @@ const categories = [
   },
 ]
 
-export function JewelryCategories() {
+interface JewelryCategoriesProps {
+  onSubcategoryClick: (subcategory: string | null) => void;
+}
+
+export function JewelryCategories({ onSubcategoryClick }: JewelryCategoriesProps) {
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -88,7 +92,7 @@ export function JewelryCategories() {
               </div>
 
               <CardContent className="p-6">
-                <Button className="w-full bg-primary hover:bg-primary/90">Ver {category.name}</Button>
+                <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => onSubcategoryClick(category.name)}>Ver {category.name}</Button>
               </CardContent>
             </Card>
           ))}

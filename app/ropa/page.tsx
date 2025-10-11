@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -5,19 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Heart, ShoppingCart, Filter } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import dbConnect from "@/lib/db"
-import Product from "@/models/Product"
 import { Types } from "mongoose"
-
-// Interfaces for type safety
-interface ProductData {
-  _id: Types.ObjectId;
-  name: string;
-  price: string;
-  image: string;
-  category: string;
-  subcategory?: string;
-}
 
 interface PageProduct {
   id: string;
@@ -28,24 +19,33 @@ interface PageProduct {
   subcategory?: string;
 }
 
-// Async function to fetch clothing products from the database
-async function getClothingProducts(): Promise<PageProduct[]> {
-  await dbConnect()
-  // Find products where category is 'Ropa' (case-insensitive)
-  const products = (await Product.find({ category: /ropa/i }).lean()) as unknown as ProductData[]
+export default function RopaPage() {
+  const [products, setProducts] = useState<PageProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<PageProduct[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
-  return products.map((product) => ({
-    id: product._id.toString(),
-    name: product.name,
-    price: parseFloat(product.price) || 0,
-    image: product.image,
-    category: product.category,
-    subcategory: product.subcategory,
-  }))
-}
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await fetch('/api/products?category=Ropa');
+      const data = await res.json();
+      setProducts(data);
+      setFilteredProducts(data);
+      const uniqueSubcategories = Array.from(new Set(data.map((p: PageProduct) => p.subcategory).filter(Boolean)));
+      // @ts-ignore
+      setSubcategories(uniqueSubcategories);
+    };
+    fetchProducts();
+  }, []);
 
-export default async function RopaPage() {
-  const clothingProducts = await getClothingProducts()
+  const handleSubcategoryClick = (subcategory: string | null) => {
+    setSelectedSubcategory(subcategory);
+    if (subcategory) {
+      setFilteredProducts(products.filter(p => p.subcategory === subcategory));
+    } else {
+      setFilteredProducts(products);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,18 +71,23 @@ export default async function RopaPage() {
         <section className="py-12 border-b">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button variant="outline" size="sm">
+              <Button
+                variant={!selectedSubcategory ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleSubcategoryClick(null)}
+              >
                 Todas las Categorías
               </Button>
-              <Button variant="outline" size="sm">
-                Camisas
-              </Button>
-              <Button variant="outline" size="sm">
-                Hoodies
-              </Button>
-              <Button variant="outline" size="sm">
-                Accesorios
-              </Button>
+              {subcategories.map(sc => (
+                <Button
+                  key={sc}
+                  variant={selectedSubcategory === sc ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSubcategoryClick(sc)}
+                >
+                  {sc}
+                </Button>
+              ))}
             </div>
           </div>
         </section>
@@ -92,7 +97,7 @@ export default async function RopaPage() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-muted-foreground">Mostrando {clothingProducts.length} productos</p>
+                <p className="text-muted-foreground">Mostrando {filteredProducts.length} productos</p>
               </div>
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
@@ -102,7 +107,7 @@ export default async function RopaPage() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {clothingProducts.map((product) => (
+              {filteredProducts.map((product) => (
                 <Link href={`/tienda/${product.id}`} key={product.id} className="group">
                   <div className="relative aspect-square mb-4 overflow-hidden rounded-lg bg-accent/5">
                     <Image
