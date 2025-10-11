@@ -36,7 +36,7 @@ interface Product {
   price: string;
   originalPrice?: string;
   category: string;
-  subcategory?: string;
+  subcategory: string;
   image: string;
   badge: string;
   badgeColor: string;

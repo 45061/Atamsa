@@ -55,6 +55,7 @@ interface Product {
   originalPrice?: string
   category: string
   image: string
+  images?: string[]
   badge: string
   badgeColor: string
   description: string
