@@ -4,83 +4,49 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, ShoppingCart, Filter } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import dbConnect from "@/lib/db"
+import Product from "@/models/Product"
+import { Types } from "mongoose"
 
-const ropaProducts = [
-  {
-    id: 1,
-    name: "Ruana Tradicional Boyacense",
-    price: 189000,
-    image: "/traditional-colombian-ruana-wool-poncho.jpg",
-    category: "Ruanas",
-    colors: ["Rojo", "Azul", "Verde"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 2,
-    name: "Camisa Guayabera Blanca",
-    price: 145000,
-    image: "/white-guayabera-shirt-colombian-style.jpg",
-    category: "Camisas",
-    colors: ["Blanco", "Beige"],
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 3,
-    name: "Vestido Wayuu Artesanal",
-    price: 220000,
-    image: "/colorful-wayuu-traditional-dress.jpg",
-    category: "Vestidos",
-    colors: ["Multicolor"],
-    sizes: ["S", "M", "L"],
-  },
-  {
-    id: 4,
-    name: "Sombrero Vueltiao Auténtico",
-    price: 95000,
-    image: "/colombian-vueltiao-hat-traditional.jpg",
-    category: "Accesorios",
-    colors: ["Natural"],
-    sizes: ["Único"],
-  },
-  {
-    id: 5,
-    name: "Mochila Arhuaca Original",
-    price: 175000,
-    image: "/arhuaca-indigenous-bag-colorful-patterns.jpg",
-    category: "Accesorios",
-    colors: ["Multicolor"],
-    sizes: ["Único"],
-  },
-  {
-    id: 6,
-    name: "Poncho Andino de Lana",
-    price: 210000,
-    image: "/andean-wool-poncho-traditional-patterns.jpg",
-    category: "Ruanas",
-    colors: ["Gris", "Café", "Negro"],
-    sizes: ["M", "L", "XL"],
-  },
-  {
-    id: 7,
-    name: "Falda Pollera Tradicional",
-    price: 165000,
-    image: "/traditional-colombian-pollera-skirt-colorful.jpg",
-    category: "Faldas",
-    colors: ["Rojo", "Amarillo", "Azul"],
-    sizes: ["S", "M", "L"],
-  },
-  {
-    id: 8,
-    name: "Chaleco Artesanal Bordado",
-    price: 135000,
-    image: "/embroidered-colombian-vest-traditional.jpg",
-    category: "Chalecos",
-    colors: ["Negro", "Café"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-]
+// Interfaces for type safety
+interface ProductData {
+  _id: Types.ObjectId;
+  name: string;
+  price: string;
+  image: string;
+  category: string;
+  subcategory?: string;
+}
 
-export default function RopaPage() {
+interface PageProduct {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  category?: string;
+  subcategory?: string;
+}
+
+// Async function to fetch clothing products from the database
+async function getClothingProducts(): Promise<PageProduct[]> {
+  await dbConnect()
+  // Find products where category is 'Ropa' (case-insensitive)
+  const products = (await Product.find({ category: /ropa/i }).lean()) as unknown as ProductData[]
+
+  return products.map((product) => ({
+    id: product._id.toString(),
+    name: product.name,
+    price: parseFloat(product.price) || 0,
+    image: product.image,
+    category: product.category,
+    subcategory: product.subcategory,
+  }))
+}
+
+export default async function RopaPage() {
+  const clothingProducts = await getClothingProducts()
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -109,16 +75,10 @@ export default function RopaPage() {
                 Todas las Categorías
               </Button>
               <Button variant="outline" size="sm">
-                Ruanas
-              </Button>
-              <Button variant="outline" size="sm">
                 Camisas
               </Button>
               <Button variant="outline" size="sm">
-                Vestidos
-              </Button>
-              <Button variant="outline" size="sm">
-                Faldas
+                Hoodies
               </Button>
               <Button variant="outline" size="sm">
                 Accesorios
@@ -132,7 +92,7 @@ export default function RopaPage() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-muted-foreground">Mostrando {ropaProducts.length} productos</p>
+                <p className="text-muted-foreground">Mostrando {clothingProducts.length} productos</p>
               </div>
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
@@ -142,8 +102,8 @@ export default function RopaPage() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {ropaProducts.map((product) => (
-                <div key={product.id} className="group">
+              {clothingProducts.map((product) => (
+                <Link href={`/tienda/${product.id}`} key={product.id} className="group">
                   <div className="relative aspect-square mb-4 overflow-hidden rounded-lg bg-accent/5">
                     <Image
                       src={product.image || "/placeholder.svg"}
@@ -165,23 +125,14 @@ export default function RopaPage() {
                   </div>
                   <div className="space-y-2">
                     <Badge variant="secondary" className="text-xs">
-                      {product.category}
+                      {product.subcategory || product.category}
                     </Badge>
                     <h3 className="font-medium text-sm text-balance leading-tight">{product.name}</h3>
                     <div className="flex items-center gap-2">
                       <p className="font-display text-lg text-primary">${product.price.toLocaleString("es-CO")}</p>
                     </div>
-                    <div className="flex gap-1">
-                      {product.colors.slice(0, 3).map((color, idx) => (
-                        <div
-                          key={idx}
-                          className="w-5 h-5 rounded-full border border-border bg-accent/20"
-                          title={color}
-                        />
-                      ))}
-                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

@@ -20,6 +20,7 @@ interface Product {
   materials: string[];
   styles: string[];
   inStock: boolean;
+  category: string;
 }
 
 export function JewelryProducts() {
@@ -28,7 +29,14 @@ export function JewelryProducts() {
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
-      .then(data => setProducts(data));
+      .then(allProducts => {
+        const jewelryProducts = allProducts.filter((product: Product) => {
+          const category = product.category || '';
+          // Case- and accent-insensitive regex for 'joyeria'
+          return /joyer[ií]a/i.test(category);
+        });
+        setProducts(jewelryProducts);
+      });
   }, []);
 
   return (
