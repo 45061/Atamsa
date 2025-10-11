@@ -14,7 +14,6 @@ interface ProductData {
   image: string;
   category: string;
   subcategory?: string;
-  inStock: boolean;
 }
 
 // This interface defines the shape of the product object used by the page component
@@ -25,7 +24,6 @@ export interface PageProduct {
   image?: string;
   category?: string;
   subcategory?: string;
-  inStock: boolean;
 }
 
 // Helper function to fetch and process products
@@ -40,7 +38,6 @@ async function getProducts(): Promise<PageProduct[]> {
     image: product.image,
     category: product.category,
     subcategory: product.subcategory,
-    inStock: product.inStock,
   }))
 }
 

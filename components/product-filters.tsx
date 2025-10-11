@@ -16,7 +16,6 @@ interface Product {
   image?: string;
   category?: string;
   subcategory?: string;
-  inStock: boolean;
 }
 
 interface ProductFiltersProps {
@@ -98,20 +97,20 @@ export function ProductFilters({ allProducts }: ProductFiltersProps) {
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
                   />
-                  {!product.inStock && (
-                    <Badge variant="destructive" className="absolute top-3 left-3 text-xs">
-                      Agotado
-                    </Badge>
-                  )}
                   <div className="absolute top-3 right-3 flex flex-col gap-2">
                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full">
                       <Heart className="h-4 w-4" />
                     </Button>
                   </div>
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {product.category}
+                    </Badge>
+                  </div>
                   <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button className="w-full" size="sm" disabled={!product.inStock}>
+                    <Button className="w-full" size="sm">
                       <ShoppingCart className="h-4 w-4 mr-2" />
-                      {product.inStock ? "Agregar al Carrito" : "Agotado"}
+                      Agregar al Carrito
                     </Button>
                   </div>
                 </div>
