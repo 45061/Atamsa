@@ -1,12 +1,24 @@
+
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Certificate from "@/models/Certificate";
 import cloudinary from "@/lib/cloudinary";
 
+// GET all certificates
+export async function GET() {
+  await dbConnect();
+  try {
+    const certificates = await Certificate.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(certificates);
+  } catch (error) {
+    console.error("Error fetching certificates:", error);
+    return NextResponse.json({ message: "Error fetching certificates" }, { status: 500 });
+  }
+}
+
+
 // Helper function to upload a single file to Cloudinary
 async function uploadFileToCloudinary(file: File): Promise<string> {
-  console.log(`Uploading file: ${file.name}, size: ${file.size}, type: ${file.type}`);
-
   if (file.size === 0) {
     throw new Error(`Cannot upload empty file: ${file.name}`);
   }
@@ -26,7 +38,6 @@ async function uploadFileToCloudinary(file: File): Promise<string> {
           return reject(error);
         }
         if (result) {
-          console.log(`Successfully uploaded ${file.name}, URL: ${result.secure_url}`);
           return resolve(result.secure_url);
         }
         return reject(new Error("Cloudinary upload result is undefined"));
@@ -41,45 +52,30 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
 
-    // --- File Uploads ---
     const fileFields = [
       'atamsaLogo', 'jewelVideo', 'mainGemPhoto', 
       'evaluatorSignature', 'managerSeal'
     ];
     
     const uploadPromises: Promise<any>[] = [];
-
-    // Handle single file uploads
     const fileUrls: { [key: string]: string } = {};
+
     for (const fieldName of fileFields) {
-      const file = formData.get(fieldName);
-      
-      console.log(`--- Processing field: ${fieldName} ---`);
-      console.log(`Value type: ${typeof file}`);
-      if (file instanceof File) {
-        console.log(`Value is a File object. Name: ${file.name}, Size: ${file.size}`);
-        if (file.size > 0) {
-          uploadPromises.push(
-            uploadFileToCloudinary(file).then(url => {
-              fileUrls[`${fieldName}Url`] = url;
-            })
-          );
-        }
-      } else {
-        console.log('Value is NOT a File object. Value:', file);
+      const file = formData.get(fieldName) as File | null;
+      if (file && file.size > 0) {
+        uploadPromises.push(
+          uploadFileToCloudinary(file).then(url => {
+            fileUrls[`${fieldName}Url`] = url;
+          })
+        );
       }
     }
 
-    // Handle multiple jewel images upload
     const jewelImagesFiles = formData.getAll("jewelImages") as File[];
-    console.log(`--- Processing jewelImages field ---`);
-    console.log(`Found ${jewelImagesFiles.length} files for jewelImages.`);
-    
     let jewelImageUrls: string[] = [];
-    const validJewelImages = jewelImagesFiles.filter(file => file instanceof File && file.size > 0);
+    const validJewelImages = jewelImagesFiles.filter(file => file.size > 0);
     
     if (validJewelImages.length > 0) {
-      console.log(`Uploading ${validJewelImages.length} valid jewel images.`);
       const jewelImagesPromise = Promise.all(
         validJewelImages.map(file => uploadFileToCloudinary(file))
       ).then(urls => {
@@ -88,10 +84,8 @@ export async function POST(request: Request) {
       uploadPromises.push(jewelImagesPromise);
     }
 
-    // Wait for all uploads to complete
     await Promise.all(uploadPromises);
 
-    // --- Data Extraction ---
     const secondaryGems = JSON.parse(formData.get("secondaryGems") as string || '[]');
 
     const certificateData = {
@@ -123,7 +117,6 @@ export async function POST(request: Request) {
       jewelImageUrls: jewelImageUrls,
     };
 
-    // --- Database Insertion ---
     const newCertificate = new Certificate(certificateData);
     const savedCertificate = await newCertificate.save();
 

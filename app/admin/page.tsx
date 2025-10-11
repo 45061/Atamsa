@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner";
 import ProductsSection from "@/components/admin/products-section";
 import EditProductForm from "@/components/admin/edit-product-form";
-import CertificateForm from "@/components/admin/certificate-form";
+import CertificatesSection from "@/components/admin/certificates-section";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Home,
@@ -1539,7 +1539,7 @@ function AdminPage() {
           )}
 
           {activeSection === "certificados" && (
-            <CertificateForm />
+            <CertificatesSection />
           )}
         </div>
       </div>
