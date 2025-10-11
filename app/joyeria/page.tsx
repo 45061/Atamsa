@@ -28,6 +28,7 @@ interface Product {
 export default function JoyeriaPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   const [subcategories, setSubcategories] = useState<string[]>([]);
 
@@ -46,8 +47,9 @@ export default function JoyeriaPage() {
   }, []);
 
   const handleSubcategoryClick = (subcategory: string | null) => {
+    setSelectedSubcategory(subcategory);
     if (subcategory) {
-      setFilteredProducts(products.filter(p => p.subcategory === subcategory));
+      setFilteredProducts(products.filter(p => p.subcategory?.toLowerCase() === subcategory.toLowerCase()));
     } else {
       setFilteredProducts(products);
     }
@@ -60,7 +62,11 @@ export default function JoyeriaPage() {
         <JewelryHero />
         <JewelryCategories onSubcategoryClick={handleSubcategoryClick} />
         <JewelryFilters subcategories={subcategories} onSubcategoryClick={handleSubcategoryClick} />
-        <JewelryProducts products={filteredProducts} />
+        <JewelryProducts 
+          products={filteredProducts} 
+          onSubcategoryClick={handleSubcategoryClick}
+          selectedSubcategory={selectedSubcategory}
+        />
       </main>
       <Footer />
     </div>

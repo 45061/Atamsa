@@ -25,9 +25,13 @@ interface Product {
 
 interface JewelryProductsProps {
   products: Product[];
+  onSubcategoryClick: (subcategory: string | null) => void;
+  selectedSubcategory: string | null;
 }
 
-export function JewelryProducts({ products }: JewelryProductsProps) {
+const subcategories = ['Collares', 'Aretes', 'Anillos', 'Pulseras', 'Conjuntos', 'Broches'];
+
+export function JewelryProducts({ products, onSubcategoryClick, selectedSubcategory }: JewelryProductsProps) {
 
   return (
     <section className="py-20">
@@ -47,6 +51,26 @@ export function JewelryProducts({ products }: JewelryProductsProps) {
               <option>Más recientes</option>
             </select>
           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 justify-center mb-12">
+          <Button
+            variant={!selectedSubcategory ? "default" : "outline"}
+            size="sm"
+            onClick={() => onSubcategoryClick(null)}
+          >
+            Todos
+          </Button>
+          {subcategories.map(sc => (
+            <Button
+              key={sc}
+              variant={selectedSubcategory === sc ? "default" : "outline"}
+              size="sm"
+              onClick={() => onSubcategoryClick(sc)}
+            >
+              {sc}
+            </Button>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

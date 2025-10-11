@@ -9,14 +9,20 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
     let query = {};
+
     if (category) {
-      query = {
-        $or: [
-          { category: 'joyeria' },
-          { category: 'joyería' },
-        ],
-      };
+      if (category.toLowerCase() === 'joyería' || category.toLowerCase() === 'joyeria') {
+        query = {
+          $or: [
+            { category: { $regex: '^joyeria$', $options: 'i' } },
+            { category: { $regex: '^joyería$', $options: 'i' } }
+          ]
+        };
+      } else {
+        query = { category: { $regex: `^${category}$`, $options: 'i' } };
+      }
     }
+
     const products = await Product.find(query);
     return NextResponse.json(products);
   } catch (error) {
