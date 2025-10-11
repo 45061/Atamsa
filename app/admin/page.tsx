@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import withAdminAuth from "@/components/withAdminAuth"
@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner";
 import ProductsSection from "@/components/admin/products-section";
 import EditProductForm from "@/components/admin/edit-product-form";
+import CertificatesSection from "@/components/admin/certificates-section";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Home,
@@ -46,6 +47,7 @@ import {
   Download,
   RefreshCw,
   X,
+  Award,
 } from "lucide-react"
 
 interface Product {
@@ -55,6 +57,7 @@ interface Product {
   originalPrice?: string
   category: string
   image: string
+  images?: string[]
   badge: string
   badgeColor: string
   description: string
@@ -612,6 +615,14 @@ function AdminPage() {
             >
               <Settings className="mr-2 h-4 w-4" />
               Configuración
+            </Button>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeSection === "certificados" ? "text-admin-accent bg-admin-accent/10" : "text-admin-muted hover:text-admin-foreground"}`}
+              onClick={() => setActiveSection("certificados")}
+            >
+              <Award className="mr-2 h-4 w-4" />
+              Certificados
             </Button>
           </nav>
         </div>
@@ -1525,6 +1536,10 @@ function AdminPage() {
                 </Button>
               </div>
             </>
+          )}
+
+          {activeSection === "certificados" && (
+            <CertificatesSection />
           )}
         </div>
       </div>

@@ -29,7 +29,12 @@ const styles = [
   { label: "Vintage", count: 32 },
 ]
 
-export function JewelryFilters() {
+interface JewelryFiltersProps {
+  subcategories: string[];
+  onSubcategoryClick: (subcategory: string | null) => void;
+}
+
+export function JewelryFilters({ subcategories, onSubcategoryClick }: JewelryFiltersProps) {
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   return (
     <section className="py-12 border-b">
@@ -74,15 +79,16 @@ export function JewelryFilters() {
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    Precio
+                    Subcategorías
                   </h3>
                   <div className="space-y-2">
-                    {priceRanges.slice(0, 3).map((range) => (
-                      <label key={range.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <span>{range.label}</span>
-                        <span className="text-muted-foreground">({range.count})</span>
-                      </label>
+                    <Button variant="outline" onClick={() => onSubcategoryClick(null)}>
+                      Todos
+                    </Button>
+                    {subcategories.map((subcategory) => (
+                      <Button key={subcategory} variant="outline" onClick={() => onSubcategoryClick(subcategory)}>
+                        {subcategory}
+                      </Button>
                     ))}
                   </div>
                 </CardContent>

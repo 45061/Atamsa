@@ -1,12 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import Product from "@/models/Product";
 import cloudinary from "@/lib/cloudinary";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   await dbConnect();
   try {
-    const products = await Product.find({});
+    const searchParams = request.nextUrl.searchParams;
+    const category = searchParams.get('category');
+    let query = {};
+
+    if (category) {
+      if (category.toLowerCase() === 'joyería' || category.toLowerCase() === 'joyeria') {
+        query = {
+          $or: [
+            { category: { $regex: '^joyeria$', $options: 'i' } },
+            { category: { $regex: '^joyería$', $options: 'i' } }
+          ]
+        };
+      } else {
+        query = { category: { $regex: `^${category}$`, $options: 'i' } };
+      }
+    }
+
+    const products = await Product.find(query);
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);

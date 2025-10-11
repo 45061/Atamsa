@@ -40,7 +40,7 @@ interface Product {
   materials?: string[];
   styles?: string[];
   inStock?: boolean;
-  subcategory?: string;
+  subcategory: string;
 }
 
 interface EditProductFormProps {

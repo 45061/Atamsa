@@ -1,86 +1,53 @@
+'use client'
+
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, ShoppingCart, Filter } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { Types } from "mongoose"
 
-const ropaProducts = [
-  {
-    id: 1,
-    name: "Ruana Tradicional Boyacense",
-    price: 189000,
-    image: "/traditional-colombian-ruana-wool-poncho.jpg",
-    category: "Ruanas",
-    colors: ["Rojo", "Azul", "Verde"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 2,
-    name: "Camisa Guayabera Blanca",
-    price: 145000,
-    image: "/white-guayabera-shirt-colombian-style.jpg",
-    category: "Camisas",
-    colors: ["Blanco", "Beige"],
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 3,
-    name: "Vestido Wayuu Artesanal",
-    price: 220000,
-    image: "/colorful-wayuu-traditional-dress.jpg",
-    category: "Vestidos",
-    colors: ["Multicolor"],
-    sizes: ["S", "M", "L"],
-  },
-  {
-    id: 4,
-    name: "Sombrero Vueltiao Auténtico",
-    price: 95000,
-    image: "/colombian-vueltiao-hat-traditional.jpg",
-    category: "Accesorios",
-    colors: ["Natural"],
-    sizes: ["Único"],
-  },
-  {
-    id: 5,
-    name: "Mochila Arhuaca Original",
-    price: 175000,
-    image: "/arhuaca-indigenous-bag-colorful-patterns.jpg",
-    category: "Accesorios",
-    colors: ["Multicolor"],
-    sizes: ["Único"],
-  },
-  {
-    id: 6,
-    name: "Poncho Andino de Lana",
-    price: 210000,
-    image: "/andean-wool-poncho-traditional-patterns.jpg",
-    category: "Ruanas",
-    colors: ["Gris", "Café", "Negro"],
-    sizes: ["M", "L", "XL"],
-  },
-  {
-    id: 7,
-    name: "Falda Pollera Tradicional",
-    price: 165000,
-    image: "/traditional-colombian-pollera-skirt-colorful.jpg",
-    category: "Faldas",
-    colors: ["Rojo", "Amarillo", "Azul"],
-    sizes: ["S", "M", "L"],
-  },
-  {
-    id: 8,
-    name: "Chaleco Artesanal Bordado",
-    price: 135000,
-    image: "/embroidered-colombian-vest-traditional.jpg",
-    category: "Chalecos",
-    colors: ["Negro", "Café"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-]
+interface PageProduct {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  category?: string;
+  subcategory?: string;
+  inStock: boolean;
+}
 
 export default function RopaPage() {
+  const [products, setProducts] = useState<PageProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<PageProduct[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await fetch('/api/products?category=Ropa');
+      const data = await res.json();
+      setProducts(data);
+      setFilteredProducts(data);
+      const uniqueSubcategories = Array.from(new Set(data.map((p: PageProduct) => p.subcategory).filter(Boolean)));
+      // @ts-ignore
+      setSubcategories(uniqueSubcategories);
+    };
+    fetchProducts();
+  }, []);
+
+  const handleSubcategoryClick = (subcategory: string | null) => {
+    setSelectedSubcategory(subcategory);
+    if (subcategory) {
+      setFilteredProducts(products.filter(p => p.subcategory === subcategory));
+    } else {
+      setFilteredProducts(products);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -105,24 +72,23 @@ export default function RopaPage() {
         <section className="py-12 border-b">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button variant="outline" size="sm">
+              <Button
+                variant={!selectedSubcategory ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleSubcategoryClick(null)}
+              >
                 Todas las Categorías
               </Button>
-              <Button variant="outline" size="sm">
-                Ruanas
-              </Button>
-              <Button variant="outline" size="sm">
-                Camisas
-              </Button>
-              <Button variant="outline" size="sm">
-                Vestidos
-              </Button>
-              <Button variant="outline" size="sm">
-                Faldas
-              </Button>
-              <Button variant="outline" size="sm">
-                Accesorios
-              </Button>
+              {subcategories.map(sc => (
+                <Button
+                  key={sc}
+                  variant={selectedSubcategory === sc ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSubcategoryClick(sc)}
+                >
+                  {sc}
+                </Button>
+              ))}
             </div>
           </div>
         </section>
@@ -132,7 +98,7 @@ export default function RopaPage() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-muted-foreground">Mostrando {ropaProducts.length} productos</p>
+                <p className="text-muted-foreground">Mostrando {filteredProducts.length} productos</p>
               </div>
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
@@ -142,8 +108,8 @@ export default function RopaPage() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {ropaProducts.map((product) => (
-                <div key={product.id} className="group">
+              {filteredProducts.map((product) => (
+                <Link href={`/tienda/${product.id}`} key={product.id} className="group">
                   <div className="relative aspect-square mb-4 overflow-hidden rounded-lg bg-accent/5">
                     <Image
                       src={product.image || "/placeholder.svg"}
@@ -151,37 +117,33 @@ export default function RopaPage() {
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
                     />
+                    {!product.inStock && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Badge variant="destructive">Agotado</Badge>
+                      </div>
+                    )}
                     <div className="absolute top-3 right-3 flex flex-col gap-2">
                       <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full">
                         <Heart className="h-4 w-4" />
                       </Button>
                     </div>
                     <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button className="w-full" size="sm">
+                      <Button className="w-full" size="sm" disabled={!product.inStock}>
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        Agregar al Carrito
+                        {product.inStock ? "Agregar al Carrito" : "Agotado"}
                       </Button>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Badge variant="secondary" className="text-xs">
-                      {product.category}
+                      {product.subcategory || product.category}
                     </Badge>
                     <h3 className="font-medium text-sm text-balance leading-tight">{product.name}</h3>
                     <div className="flex items-center gap-2">
                       <p className="font-display text-lg text-primary">${product.price.toLocaleString("es-CO")}</p>
                     </div>
-                    <div className="flex gap-1">
-                      {product.colors.slice(0, 3).map((color, idx) => (
-                        <div
-                          key={idx}
-                          className="w-5 h-5 rounded-full border border-border bg-accent/20"
-                          title={color}
-                        />
-                      ))}
-                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
