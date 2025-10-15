@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
 import { Star, Heart, ShoppingCart, Eye, Gem } from "lucide-react"
 
 interface Product {
@@ -32,6 +33,31 @@ interface JewelryProductsProps {
 const subcategories = ['Collares', 'Aretes', 'Anillos', 'Pulseras', 'Conjuntos', 'Broches'];
 
 export function JewelryProducts({ products, onSubcategoryClick, selectedSubcategory }: JewelryProductsProps) {
+  const { toast } = useToast();
+
+  const handleAddToCart = (product: Product) => {
+    const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    const existingProduct = cartItems.find((item: Product) => item._id === product._id);
+
+    if (existingProduct) {
+      toast({
+        title: "Producto ya en el carrito",
+        description: `${product.name} ya ha sido agregado anteriormente.`,
+        variant: "default",
+      });
+      return;
+    }
+
+    const newCartItems = [...cartItems, product];
+    localStorage.setItem('cart', JSON.stringify(newCartItems));
+    
+    toast({
+      title: "¡Producto Agregado!",
+      description: `${product.name} ha sido agregado a tu carrito.`,
+      variant: "default",
+    });
+  };
 
   return (
     <section className="py-20">
@@ -131,7 +157,11 @@ export function JewelryProducts({ products, onSubcategoryClick, selectedSubcateg
                   )}
                 </div>
 
-                <Button className="w-full bg-primary hover:bg-primary/90" disabled={!product.inStock}>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90" 
+                  disabled={!product.inStock}
+                  onClick={() => handleAddToCart(product)}
+                >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   {product.inStock ? "Agregar al Carrito" : "Agotado"}
                 </Button>

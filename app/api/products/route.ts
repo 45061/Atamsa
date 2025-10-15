@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const products = await Product.find(query);
+    const products = await Product.find(query).lean();
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);

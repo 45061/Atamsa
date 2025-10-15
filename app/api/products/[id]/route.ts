@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Product from "@/models/Product";
 import cloudinary from "@/lib/cloudinary";
+import mongoose from "mongoose";
 
 // Helper function to upload image stream to Cloudinary
 const uploadToCloudinary = (buffer: Uint8Array): Promise<any> => {
@@ -30,6 +31,13 @@ export async function GET(
     await dbConnect();
     const id = params.id;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid Product ID" },
+        { status: 400 }
+      );
+    }
+
     const product = await Product.findById(id);
 
     if (!product) {
@@ -56,6 +64,14 @@ export async function PUT(
   try {
     await dbConnect();
     const id = params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid Product ID" },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
 
     const updateData: { [key: string]: any } = {};
@@ -128,9 +144,9 @@ export async function DELETE(
     await dbConnect();
     const id = params.id;
 
-    if (!id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { message: "Product ID is required" },
+        { message: "Invalid Product ID" },
         { status: 400 }
       );
     }

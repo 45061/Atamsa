@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Minus, Plus, Trash2, ArrowLeft, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,83 +10,80 @@ import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
 import { LoginModal } from "@/components/login-modal"
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  quantity: number
-  image: string
-  category: string
-  description: string
+// Interfaz que coincide con los datos del localStorage
+interface Product {
+  _id: string;
+  name: string;
+  price: string; // El precio viene como string, ej: "$ 450.000"
+  originalPrice?: string;
+  image: string;
+  category: string;
+  description?: string;
+  quantity: number; // Añadimos quantity para el manejo del carrito
 }
 
+// Función para convertir el precio de string a número
+const parsePrice = (price: string): number => {
+  if (!price) return 0;
+  return Number(price.replace(/[^\d]/g, ''));
+};
+
 export function CartContent() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "Collar de Esmeraldas Boyacá",
-      price: 450000,
-      originalPrice: 520000,
-      quantity: 1,
-      image: "/colombian-emerald-jewelry-elegant-display.jpg",
-      category: "Joyería",
-      description: "Collar artesanal con esmeraldas auténticas de Boyacá",
-    },
-    {
-      id: "2",
-      name: "Camiseta Precolombina Muisca",
-      price: 85000,
-      quantity: 2,
-      image: "/colombian-pre-columbian-inspired-clothing-t-shirts.jpg",
-      category: "Ropa",
-      description: "Diseño inspirado en la cultura Muisca",
-    },
-    {
-      id: "3",
-      name: "Hoodie Bogotá Skyline",
-      price: 120000,
-      quantity: 1,
-      image: "/hoodie-with-bogota-skyline-design.jpg",
-      category: "Ropa",
-      description: "Sudadera con el skyline icónico de Bogotá",
-    },
-  ])
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const router = useRouter()
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const router = useRouter();
 
-  const updateQuantity = (id: string, newQuantity: number) => {
+  useEffect(() => {
+    const itemsFromStorage = JSON.parse(localStorage.getItem("cart") || "[]");
+    // Aseguramos que cada item tenga una cantidad
+    const itemsWithQuantity = itemsFromStorage.map((item: any) => ({
+      ...item,
+      quantity: item.quantity || 1,
+    }));
+    setCartItems(itemsWithQuantity);
+  }, []);
+
+  const updateCartInStorage = (items: Product[]) => {
+    localStorage.setItem("cart", JSON.stringify(items));
+  };
+
+  const updateQuantity = (_id: string, newQuantity: number) => {
+    let updatedItems;
     if (newQuantity === 0) {
-      setCartItems((items) => items.filter((item) => item.id !== id))
+      updatedItems = cartItems.filter((item) => item._id !== _id);
     } else {
-      setCartItems((items) => items.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+      updatedItems = cartItems.map((item) => (item._id === _id ? { ...item, quantity: newQuantity } : item));
     }
-  }
+    setCartItems(updatedItems);
+    updateCartInStorage(updatedItems);
+  };
 
-  const removeItem = (id: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== id))
-  }
+  const removeItem = (_id: string) => {
+    const updatedItems = cartItems.filter((item) => item._id !== _id);
+    setCartItems(updatedItems);
+    updateCartInStorage(updatedItems);
+  };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = subtotal > 200000 ? 0 : 15000
-  const total = subtotal + shipping
+  const subtotal = cartItems.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
+  const shipping = subtotal > 200000 ? 0 : 15000;
+  const total = subtotal + shipping;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
-    }).format(price)
-  }
+    }).format(price);
+  };
 
   const handleCheckout = () => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     if (token) {
-      router.push("/checkout")
+      router.push("/checkout");
     } else {
-      setIsLoginModalOpen(true)
+      setIsLoginModalOpen(true);
     }
-  }
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -107,7 +104,7 @@ export function CartContent() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -126,12 +123,14 @@ export function CartContent() {
           </div>
 
           {cartItems.map((item) => (
-            <Card key={item.id} className="overflow-hidden">
+            <Card key={item._id} className="overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex gap-4">
-                  <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
+                  <Link href={`/tienda/${item._id}`}>
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0 cursor-pointer">
+                      <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-cover" />
+                    </div>
+                  </Link>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
@@ -140,12 +139,12 @@ export function CartContent() {
                           {item.category}
                         </Badge>
                         <h3 className="font-semibold text-lg text-primary mb-1">{item.name}</h3>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">{item.description || ''}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item._id)}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -158,7 +157,7 @@ export function CartContent() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 bg-transparent"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
@@ -167,7 +166,7 @@ export function CartContent() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 bg-transparent"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -176,11 +175,11 @@ export function CartContent() {
                       <div className="text-right">
                         {item.originalPrice && (
                           <div className="text-sm text-muted-foreground line-through">
-                            {formatPrice(item.originalPrice * item.quantity)}
+                            {formatPrice(parsePrice(item.originalPrice) * item.quantity)}
                           </div>
                         )}
                         <div className="font-semibold text-lg text-[#1B5E20]">
-                          {formatPrice(item.price * item.quantity)}
+                          {formatPrice(parsePrice(item.price) * item.quantity)}
                         </div>
                       </div>
                     </div>
